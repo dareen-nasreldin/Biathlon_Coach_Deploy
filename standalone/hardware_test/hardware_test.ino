@@ -34,12 +34,15 @@
 #define PIN_COLOR_S3      5
 #define PIN_COLOR_OUT     6
 
-#define PIN_MOTOR_ENA     9
-#define PIN_MOTOR_IN1     8
-#define PIN_MOTOR_IN2     7
-#define PIN_MOTOR_ENB     10
-#define PIN_MOTOR_IN3     11
-#define PIN_MOTOR_IN4     12  // Direction pin 2 for Motor B
+// Motor A = LEFT wheel, Motor B = RIGHT wheel
+#define PIN_MOTOR_ENA     9   // LEFT motor speed
+#define PIN_MOTOR_IN1     8   // LEFT motor direction
+#define PIN_MOTOR_IN2     7   // LEFT motor direction
+#define PIN_MOTOR_ENB     10  // RIGHT motor speed
+#define PIN_MOTOR_IN3     11  // RIGHT motor direction
+#define PIN_MOTOR_IN4     12  // RIGHT motor direction
+
+#define SPEED_COMPENSATION  0.9  // Right motor is faster
 
 #define PIN_SERVO_BASE    A5
 #define PIN_SERVO_CLAMP   A4
@@ -56,7 +59,7 @@
 Servo baseServo, clampServo;
 
 // ============================================================================
-// MOTOR FUNCTIONS
+// MOTOR FUNCTIONS (Motor A = LEFT, Motor B = RIGHT)
 // ============================================================================
 void stopMotors() {
   analogWrite(PIN_MOTOR_ENA, 0);
@@ -69,12 +72,12 @@ void stopMotors() {
 
 void moveForward() {
   Serial.println(F(">>> Moving FORWARD..."));
-  digitalWrite(PIN_MOTOR_IN1, HIGH);
+  digitalWrite(PIN_MOTOR_IN1, HIGH);  // LEFT forward
   digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, HIGH);
+  digitalWrite(PIN_MOTOR_IN3, HIGH);  // RIGHT forward
   digitalWrite(PIN_MOTOR_IN4, LOW);
-  analogWrite(PIN_MOTOR_ENA, 150);
-  analogWrite(PIN_MOTOR_ENB, 150);
+  analogWrite(PIN_MOTOR_ENA, 150);    // LEFT
+  analogWrite(PIN_MOTOR_ENB, 135);    // RIGHT (reduced for equal speed)
   delay(2000);
   stopMotors();
   Serial.println(F(">>> Stopped"));
@@ -82,12 +85,12 @@ void moveForward() {
 
 void moveBackward() {
   Serial.println(F(">>> Moving BACKWARD..."));
-  digitalWrite(PIN_MOTOR_IN1, LOW);
+  digitalWrite(PIN_MOTOR_IN1, LOW);   // LEFT backward
   digitalWrite(PIN_MOTOR_IN2, HIGH);
-  digitalWrite(PIN_MOTOR_IN3, LOW);
+  digitalWrite(PIN_MOTOR_IN3, LOW);   // RIGHT backward
   digitalWrite(PIN_MOTOR_IN4, HIGH);
-  analogWrite(PIN_MOTOR_ENA, 150);
-  analogWrite(PIN_MOTOR_ENB, 150);
+  analogWrite(PIN_MOTOR_ENA, 150);    // LEFT
+  analogWrite(PIN_MOTOR_ENB, 135);    // RIGHT (reduced for equal speed)
   delay(2000);
   stopMotors();
   Serial.println(F(">>> Stopped"));
@@ -95,12 +98,12 @@ void moveBackward() {
 
 void turnLeft() {
   Serial.println(F(">>> Turning LEFT..."));
-  digitalWrite(PIN_MOTOR_IN1, LOW);
+  digitalWrite(PIN_MOTOR_IN1, LOW);   // LEFT backward
   digitalWrite(PIN_MOTOR_IN2, HIGH);
-  digitalWrite(PIN_MOTOR_IN3, HIGH);
+  digitalWrite(PIN_MOTOR_IN3, HIGH);  // RIGHT forward
   digitalWrite(PIN_MOTOR_IN4, LOW);
-  analogWrite(PIN_MOTOR_ENA, 120);
-  analogWrite(PIN_MOTOR_ENB, 120);
+  analogWrite(PIN_MOTOR_ENA, 120);    // LEFT
+  analogWrite(PIN_MOTOR_ENB, 108);    // RIGHT (reduced)
   delay(1000);
   stopMotors();
   Serial.println(F(">>> Stopped"));
@@ -108,12 +111,12 @@ void turnLeft() {
 
 void turnRight() {
   Serial.println(F(">>> Turning RIGHT..."));
-  digitalWrite(PIN_MOTOR_IN1, HIGH);
+  digitalWrite(PIN_MOTOR_IN1, HIGH);  // LEFT forward
   digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, LOW);
+  digitalWrite(PIN_MOTOR_IN3, LOW);   // RIGHT backward
   digitalWrite(PIN_MOTOR_IN4, HIGH);
-  analogWrite(PIN_MOTOR_ENA, 120);
-  analogWrite(PIN_MOTOR_ENB, 120);
+  analogWrite(PIN_MOTOR_ENA, 120);    // LEFT
+  analogWrite(PIN_MOTOR_ENB, 108);    // RIGHT (reduced)
   delay(1000);
   stopMotors();
   Serial.println(F(">>> Stopped"));
@@ -121,14 +124,16 @@ void turnRight() {
 
 void testAllMotors() {
   Serial.println(F("\n=== TESTING ALL MOTORS ===\n"));
+  Serial.println(F("Motor A = LEFT, Motor B = RIGHT"));
+  Serial.println();
   
   Serial.println(F("1. Forward..."));
-  digitalWrite(PIN_MOTOR_IN1, HIGH);
+  digitalWrite(PIN_MOTOR_IN1, HIGH);  // LEFT forward
   digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, HIGH);
+  digitalWrite(PIN_MOTOR_IN3, HIGH);  // RIGHT forward
   digitalWrite(PIN_MOTOR_IN4, LOW);
-  analogWrite(PIN_MOTOR_ENA, 150);
-  analogWrite(PIN_MOTOR_ENB, 150);
+  analogWrite(PIN_MOTOR_ENA, 150);    // LEFT
+  analogWrite(PIN_MOTOR_ENB, 135);    // RIGHT (reduced)
   delay(1500);
   stopMotors();
   delay(500);

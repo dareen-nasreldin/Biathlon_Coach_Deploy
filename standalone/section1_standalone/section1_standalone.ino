@@ -62,13 +62,16 @@
 //   - IN1/IN2: Direction for Motor A. IN1=HIGH,IN2=LOW = forward
 //   - IN3/IN4: Direction for Motor B. IN3=HIGH,IN4=LOW = forward
 //
-// Motor A = Right wheel, Motor B = Left wheel
-#define PIN_MOTOR_ENA     9   // Speed control for Motor A (MUST be PWM pin)
-#define PIN_MOTOR_IN1     8   // Direction pin 1 for Motor A
-#define PIN_MOTOR_IN2     7   // Direction pin 2 for Motor A
-#define PIN_MOTOR_ENB     10  // Speed control for Motor B (MUST be PWM pin)
-#define PIN_MOTOR_IN3     11  // Direction pin 1 for Motor B
-#define PIN_MOTOR_IN4     12  // Direction pin 2 for Motor B
+// Motor A = LEFT wheel, Motor B = RIGHT wheel
+#define PIN_MOTOR_ENA     9   // Speed control for Motor A / LEFT (MUST be PWM pin)
+#define PIN_MOTOR_IN1     8   // Direction pin 1 for Motor A / LEFT
+#define PIN_MOTOR_IN2     7   // Direction pin 2 for Motor A / LEFT
+#define PIN_MOTOR_ENB     10  // Speed control for Motor B / RIGHT (MUST be PWM pin)
+#define PIN_MOTOR_IN3     11  // Direction pin 1 for Motor B / RIGHT
+#define PIN_MOTOR_IN4     12  // Direction pin 2 for Motor B / RIGHT
+
+// Speed compensation: Right motor is faster, reduce its speed
+#define SPEED_COMPENSATION  0.9  // Multiply right motor speed by this
 
 // --- SERVOS ---
 // Servos are motors that rotate to a specific angle (0-180 degrees).
@@ -315,20 +318,22 @@ void readIR(bool& left, bool& right) {
  * Sets PWM to 0 (no power to motors).
  */
 void stopMotors() {
-  analogWrite(PIN_MOTOR_ENA, 0);  // Stop Motor A (right)
-  analogWrite(PIN_MOTOR_ENB, 0);  // Stop Motor B (left)
+  analogWrite(PIN_MOTOR_ENA, 0);  // Stop Motor A (LEFT)
+  analogWrite(PIN_MOTOR_ENB, 0);  // Stop Motor B (RIGHT)
 }
 
 /**
  * moveForward() - Drive both motors forward.
  * 
  * HOW MOTOR DIRECTION WORKS:
- * Motor A (right): IN1=HIGH, IN2=LOW → Forward
- * Motor B (left):  IN3=HIGH, IN4=LOW → Forward
+ * Motor A (LEFT):  IN1=HIGH, IN2=LOW → Forward
+ * Motor B (RIGHT): IN3=HIGH, IN4=LOW → Forward
  * 
  * The speed (0-255) is sent to ENA and ENB as PWM signal.
  * PWM (Pulse Width Modulation) rapidly switches power on/off.
  * Higher duty cycle = more average power = faster motor.
+ * 
+ * Speed compensation applied to right motor (it's faster).
  */
 void moveForward(uint8_t speed) {
   // Set direction: forward
@@ -337,16 +342,16 @@ void moveForward(uint8_t speed) {
   digitalWrite(PIN_MOTOR_IN3, HIGH);
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
-  // Set speed (same for both motors = go straight)
-  analogWrite(PIN_MOTOR_ENA, speed);
-  analogWrite(PIN_MOTOR_ENB, speed);
+  // Set speed with compensation (right motor is faster)
+  analogWrite(PIN_MOTOR_ENA, speed);                              // LEFT motor
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION)); // RIGHT motor (reduced)
 }
 
 /**
  * curveLeft() - Move forward while curving to the left.
  * 
  * HOW CURVES WORK:
- * To curve left, slow down the LEFT motor (Motor B).
+ * To curve left, slow down the LEFT motor (Motor A).
  * Right motor goes full speed, left motor goes half speed.
  * The robot arcs to the left while still moving forward.
  * 
@@ -359,9 +364,9 @@ void curveLeft(uint8_t speed) {
   digitalWrite(PIN_MOTOR_IN3, HIGH);
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
-  // Right motor full speed, left motor half speed
-  analogWrite(PIN_MOTOR_ENA, speed);       // Right: full
-  analogWrite(PIN_MOTOR_ENB, speed / 2);   // Left: half
+  // Left motor half speed, right motor full speed
+  analogWrite(PIN_MOTOR_ENA, speed / 2);                          // LEFT: half
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION)); // RIGHT: full (compensated)
 }
 
 /**
@@ -376,8 +381,8 @@ void curveRight(uint8_t speed) {
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
   // Left motor full speed, right motor half speed
-  analogWrite(PIN_MOTOR_ENA, speed / 2);   // Right: half
-  analogWrite(PIN_MOTOR_ENB, speed);       // Left: full
+  analogWrite(PIN_MOTOR_ENA, speed);                                      // LEFT: full
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)((speed / 2) * SPEED_COMPENSATION)); // RIGHT: half (compensated)
 }
 
 /**
@@ -389,14 +394,14 @@ void curveRight(uint8_t speed) {
  * Used for sharp turns (like at intersections).
  */
 void turnLeft(uint8_t speed) {
-  // Right motor forward, left motor backward
-  digitalWrite(PIN_MOTOR_IN1, HIGH);  // Right forward
-  digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, LOW);   // Left backward
-  digitalWrite(PIN_MOTOR_IN4, HIGH);
+  // Left motor backward, right motor forward
+  digitalWrite(PIN_MOTOR_IN1, LOW);   // LEFT backward
+  digitalWrite(PIN_MOTOR_IN2, HIGH);
+  digitalWrite(PIN_MOTOR_IN3, HIGH);  // RIGHT forward
+  digitalWrite(PIN_MOTOR_IN4, LOW);
   
-  analogWrite(PIN_MOTOR_ENA, speed);
-  analogWrite(PIN_MOTOR_ENB, speed);
+  analogWrite(PIN_MOTOR_ENA, speed);                              // LEFT
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION)); // RIGHT (compensated)
 }
 
 /**
@@ -404,14 +409,14 @@ void turnLeft(uint8_t speed) {
  * Opposite of turnLeft.
  */
 void turnRight(uint8_t speed) {
-  // Right motor backward, left motor forward
-  digitalWrite(PIN_MOTOR_IN1, LOW);   // Right backward
-  digitalWrite(PIN_MOTOR_IN2, HIGH);
-  digitalWrite(PIN_MOTOR_IN3, HIGH);  // Left forward
-  digitalWrite(PIN_MOTOR_IN4, LOW);
+  // Left motor forward, right motor backward
+  digitalWrite(PIN_MOTOR_IN1, HIGH);  // LEFT forward
+  digitalWrite(PIN_MOTOR_IN2, LOW);
+  digitalWrite(PIN_MOTOR_IN3, LOW);   // RIGHT backward
+  digitalWrite(PIN_MOTOR_IN4, HIGH);
   
-  analogWrite(PIN_MOTOR_ENA, speed);
-  analogWrite(PIN_MOTOR_ENB, speed);
+  analogWrite(PIN_MOTOR_ENA, speed);                              // LEFT
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION)); // RIGHT (compensated)
 }
 
 

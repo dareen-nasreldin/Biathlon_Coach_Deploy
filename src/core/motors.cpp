@@ -64,13 +64,16 @@ void Motors::curveRight(uint8_t speed) {
 // ============================================================================
 // LOW-LEVEL CONTROL - O(1)
 // ============================================================================
+// Speed compensation: right motor is faster, reduce its speed by 10%
+#define SPEED_COMP 0.9
+
 void Motors::set(uint8_t leftSpeed, MotorDirection leftDir,
                  uint8_t rightSpeed, MotorDirection rightDir) {
-  // Left motor (Motor B - ENB, IN3, IN4)
-  setMotor(PIN_MOTOR_IN3, PIN_MOTOR_IN4, PIN_MOTOR_ENB, leftSpeed, leftDir);
+  // Left motor (Motor A - ENA, IN1, IN2)
+  setMotor(PIN_MOTOR_IN1, PIN_MOTOR_IN2, PIN_MOTOR_ENA, leftSpeed, leftDir);
   
-  // Right motor (Motor A - ENA, IN1, IN2)
-  setMotor(PIN_MOTOR_IN1, PIN_MOTOR_IN2, PIN_MOTOR_ENA, rightSpeed, rightDir);
+  // Right motor (Motor B - ENB, IN3, IN4) with speed compensation
+  setMotor(PIN_MOTOR_IN3, PIN_MOTOR_IN4, PIN_MOTOR_ENB, (uint8_t)(rightSpeed * SPEED_COMP), rightDir);
 }
 
 void Motors::setMotor(uint8_t in1, uint8_t in2, uint8_t en, 

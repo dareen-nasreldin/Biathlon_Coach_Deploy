@@ -17,12 +17,15 @@
 #define PIN_COLOR_S3      5
 #define PIN_COLOR_OUT     6
 
-#define PIN_MOTOR_ENA     9
-#define PIN_MOTOR_IN1     8
-#define PIN_MOTOR_IN2     7
-#define PIN_MOTOR_ENB     10
-#define PIN_MOTOR_IN3     11
-#define PIN_MOTOR_IN4     12  // Direction pin 2 for Motor B
+// Motor A = LEFT wheel, Motor B = RIGHT wheel
+#define PIN_MOTOR_ENA     9   // LEFT motor speed
+#define PIN_MOTOR_IN1     8   // LEFT motor direction
+#define PIN_MOTOR_IN2     7   // LEFT motor direction
+#define PIN_MOTOR_ENB     10  // RIGHT motor speed
+#define PIN_MOTOR_IN3     11  // RIGHT motor direction
+#define PIN_MOTOR_IN4     12  // RIGHT motor direction
+
+#define SPEED_COMPENSATION  0.9  // Right motor is faster, reduce its speed
 
 #define PIN_SERVO_BASE    A5
 #define PIN_SERVO_CLAMP   A4
@@ -108,28 +111,31 @@ Color readColor() {
 }
 
 // ============================================================================
-// MOTOR FUNCTIONS
+// MOTOR FUNCTIONS (Motor A = LEFT, Motor B = RIGHT)
 // ============================================================================
 void stopMotors() {
   analogWrite(PIN_MOTOR_ENA, 0); analogWrite(PIN_MOTOR_ENB, 0);
 }
 
 void moveForward(uint8_t speed) {
-  digitalWrite(PIN_MOTOR_IN1, HIGH); digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, HIGH); digitalWrite(PIN_MOTOR_IN4, LOW);
-  analogWrite(PIN_MOTOR_ENA, speed); analogWrite(PIN_MOTOR_ENB, speed);
+  digitalWrite(PIN_MOTOR_IN1, HIGH); digitalWrite(PIN_MOTOR_IN2, LOW);  // LEFT forward
+  digitalWrite(PIN_MOTOR_IN3, HIGH); digitalWrite(PIN_MOTOR_IN4, LOW);  // RIGHT forward
+  analogWrite(PIN_MOTOR_ENA, speed);                                    // LEFT speed
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION));    // RIGHT speed (reduced)
 }
 
 void turnLeft(uint8_t speed) {
-  digitalWrite(PIN_MOTOR_IN1, LOW); digitalWrite(PIN_MOTOR_IN2, HIGH);
-  digitalWrite(PIN_MOTOR_IN3, HIGH); digitalWrite(PIN_MOTOR_IN4, LOW);
-  analogWrite(PIN_MOTOR_ENA, speed); analogWrite(PIN_MOTOR_ENB, speed);
+  digitalWrite(PIN_MOTOR_IN1, LOW); digitalWrite(PIN_MOTOR_IN2, HIGH);  // LEFT backward
+  digitalWrite(PIN_MOTOR_IN3, HIGH); digitalWrite(PIN_MOTOR_IN4, LOW);  // RIGHT forward
+  analogWrite(PIN_MOTOR_ENA, speed);
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION));
 }
 
 void turnRight(uint8_t speed) {
-  digitalWrite(PIN_MOTOR_IN1, HIGH); digitalWrite(PIN_MOTOR_IN2, LOW);
-  digitalWrite(PIN_MOTOR_IN3, LOW); digitalWrite(PIN_MOTOR_IN4, HIGH);
-  analogWrite(PIN_MOTOR_ENA, speed); analogWrite(PIN_MOTOR_ENB, speed);
+  digitalWrite(PIN_MOTOR_IN1, HIGH); digitalWrite(PIN_MOTOR_IN2, LOW);  // LEFT forward
+  digitalWrite(PIN_MOTOR_IN3, LOW); digitalWrite(PIN_MOTOR_IN4, HIGH);  // RIGHT backward
+  analogWrite(PIN_MOTOR_ENA, speed);
+  analogWrite(PIN_MOTOR_ENB, (uint8_t)(speed * SPEED_COMPENSATION));
 }
 
 // ============================================================================

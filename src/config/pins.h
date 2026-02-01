@@ -19,12 +19,13 @@
 // ============================================================================
 // MOTOR DRIVER (L298N)
 // ============================================================================
-#define PIN_MOTOR_ENA     9   // Motor A PWM (Right motor)
-#define PIN_MOTOR_IN1     8   // Motor A direction 1
-#define PIN_MOTOR_IN2     7   // Motor A direction 2
-#define PIN_MOTOR_ENB     10  // Motor B PWM (Left motor)
-#define PIN_MOTOR_IN3     11  // Motor B direction 1
-#define PIN_MOTOR_IN4     12  // Motor B direction 2
+// Motor A = LEFT wheel, Motor B = RIGHT wheel
+#define PIN_MOTOR_ENA     9   // Motor A PWM (LEFT motor)
+#define PIN_MOTOR_IN1     8   // Motor A direction 1 (LEFT)
+#define PIN_MOTOR_IN2     7   // Motor A direction 2 (LEFT)
+#define PIN_MOTOR_ENB     10  // Motor B PWM (RIGHT motor)
+#define PIN_MOTOR_IN3     11  // Motor B direction 1 (RIGHT)
+#define PIN_MOTOR_IN4     12  // Motor B direction 2 (RIGHT)
 
 // ============================================================================
 // SERVOS

@@ -115,8 +115,8 @@ void printMenu() {
   Serial.println(F("║         DIAGNOSTIC COMMANDS            ║"));
   Serial.println(F("╠════════════════════════════════════════╣"));
   Serial.println(F("║  0 - Test Serial (echo test)           ║"));
-  Serial.println(F("║  1 - Test Motor A only (right)         ║"));
-  Serial.println(F("║  2 - Test Motor B only (left)          ║"));
+  Serial.println(F("║  1 - Test Motor A only (LEFT)          ║"));
+  Serial.println(F("║  2 - Test Motor B only (RIGHT)         ║"));
   Serial.println(F("║  3 - Test BOTH motors forward          ║"));
   Serial.println(F("║  4 - Test servos                       ║"));
   Serial.println(F("║  5 - Test ultrasonic                   ║"));
@@ -231,7 +231,7 @@ void testSerial() {
 }
 
 void testMotorA() {
-  Serial.println(F("\n=== MOTOR A (RIGHT) TEST ==="));
+  Serial.println(F("\n=== MOTOR A (LEFT WHEEL) TEST ==="));
   Serial.println(F("This tests pins: ENA(9), IN1(8), IN2(7)"));
   Serial.println();
   
@@ -241,7 +241,7 @@ void testMotorA() {
   delay(100);
   
   Serial.println(F("Step 2: Setting ENA=150 (PWM speed)"));
-  Serial.println(F(">>> Motor A should spin now for 3 seconds..."));
+  Serial.println(F(">>> Motor A (LEFT) should spin now for 3 seconds..."));
   analogWrite(PIN_MOTOR_ENA, 150);
   
   delay(3000);
@@ -251,14 +251,14 @@ void testMotorA() {
   digitalWrite(PIN_MOTOR_IN1, LOW);
   digitalWrite(PIN_MOTOR_IN2, LOW);
   
-  Serial.println(F("\nDid Motor A (right wheel) spin?"));
+  Serial.println(F("\nDid Motor A (LEFT wheel) spin?"));
   Serial.println(F("If NO - check: ENA->Pin9, IN1->Pin8, IN2->Pin7, OUT1/OUT2->Motor"));
   Serial.println();
 }
 
 void testMotorB() {
-  Serial.println(F("\n=== MOTOR B (LEFT) TEST ==="));
-  Serial.println(F("This tests pins: ENB(10), IN3(11), IN4(13)"));
+  Serial.println(F("\n=== MOTOR B (RIGHT WHEEL) TEST ==="));
+  Serial.println(F("This tests pins: ENB(10), IN3(11), IN4(12)"));
   Serial.println();
   
   Serial.println(F("Step 1: Setting IN3=HIGH, IN4=LOW (forward direction)"));
@@ -267,7 +267,7 @@ void testMotorB() {
   delay(100);
   
   Serial.println(F("Step 2: Setting ENB=150 (PWM speed)"));
-  Serial.println(F(">>> Motor B should spin now for 3 seconds..."));
+  Serial.println(F(">>> Motor B (RIGHT) should spin now for 3 seconds..."));
   analogWrite(PIN_MOTOR_ENB, 150);
   
   delay(3000);
@@ -277,14 +277,16 @@ void testMotorB() {
   digitalWrite(PIN_MOTOR_IN3, LOW);
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
-  Serial.println(F("\nDid Motor B (left wheel) spin?"));
-  Serial.println(F("If NO - check: ENB->Pin10, IN3->Pin11, IN4->Pin13, OUT3/OUT4->Motor"));
+  Serial.println(F("\nDid Motor B (RIGHT wheel) spin?"));
+  Serial.println(F("If NO - check: ENB->Pin10, IN3->Pin11, IN4->Pin12, OUT3/OUT4->Motor"));
   Serial.println();
 }
 
 void testBothMotors() {
   Serial.println(F("\n=== BOTH MOTORS TEST ==="));
   Serial.println(F("Both motors should spin forward for 3 seconds..."));
+  Serial.println(F("Motor A = LEFT, Motor B = RIGHT"));
+  Serial.println(F("Speed compensation applied: LEFT=150, RIGHT=135 (90%)"));
   Serial.println();
   
   // Set direction
@@ -293,10 +295,10 @@ void testBothMotors() {
   digitalWrite(PIN_MOTOR_IN3, HIGH);
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
-  // Set speed
-  Serial.println(F(">>> Starting motors at speed 150..."));
-  analogWrite(PIN_MOTOR_ENA, 150);
-  analogWrite(PIN_MOTOR_ENB, 150);
+  // Set speed with compensation (right motor is faster, reduce it)
+  Serial.println(F(">>> Starting motors..."));
+  analogWrite(PIN_MOTOR_ENA, 150);  // LEFT motor
+  analogWrite(PIN_MOTOR_ENB, 135);  // RIGHT motor (reduced to match left)
   
   delay(3000);
   
@@ -310,9 +312,9 @@ void testBothMotors() {
   digitalWrite(PIN_MOTOR_IN4, LOW);
   
   Serial.println(F("\nResults:"));
-  Serial.println(F("- Both wheels spun: GOOD!"));
-  Serial.println(F("- Only right spun: Check Motor B wiring"));
-  Serial.println(F("- Only left spun: Check Motor A wiring"));
+  Serial.println(F("- Both wheels spun equally: GOOD!"));
+  Serial.println(F("- Only LEFT spun: Check Motor B (RIGHT) wiring"));
+  Serial.println(F("- Only RIGHT spun: Check Motor A (LEFT) wiring"));
   Serial.println(F("- Neither spun: Check motor driver power (12V) and GND"));
   Serial.println();
 }
