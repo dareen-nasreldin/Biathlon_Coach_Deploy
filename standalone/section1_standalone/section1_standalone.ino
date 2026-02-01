@@ -477,40 +477,37 @@ void drop() {
 // ╚═══════════════════════════════════════════════════════════════════════════╝
 
 /**
- * followBlackLine() - Follow a black line using IR sensors.
+ * followBlackLine() - Follow a black line using the COLOR sensor.
  * 
- * HOW LINE FOLLOWING WORKS:
- * The two IR sensors straddle the black line.
+ * HOW IT WORKS:
+ * Single color sensor detects if we're on the black line.
  * 
- *    [LEFT_IR]    |BLACK LINE|    [RIGHT_IR]
- *                 
- * - Both sensors on line → Go straight
- * - Only left on line    → We drifted RIGHT, curve LEFT to correct
- * - Only right on line   → We drifted LEFT, curve RIGHT to correct
- * - Neither on line      → Lost the line, go slow and hope to find it
+ * - BLACK detected → Go straight forward
+ * - Not BLACK      → Slowly search by curving (alternating direction)
+ * 
+ * Since we only have ONE sensor, we can't tell which side we drifted.
+ * We use a simple strategy: alternate search direction each time we lose the line.
  */
+static bool searchDirection = false;  // Alternates left/right when searching
+
 void followBlackLine() {
-  bool left, right;
-  readIR(left, right);
+  Color c = readColor();
   
-  if (left && right) {
-    // Both sensors on line - perfect! Go straight.
+  if (c == COLOR_BLACK) {
+    // On the black line - go straight!
     moveForward(SPEED_NORMAL);
-  }
-  else if (left && !right) {
-    // Only left sensor on line - we've drifted right
-    // Curve left to get back on track
-    curveLeft(SPEED_NORMAL);
-  }
-  else if (!left && right) {
-    // Only right sensor on line - we've drifted left
-    // Curve right to get back on track
-    curveRight(SPEED_NORMAL);
+    // Reset search direction for next time we lose line
   }
   else {
-    // Neither sensor on line - we've lost it!
-    // Go slow and hope to re-acquire
-    moveForward(SPEED_SLOW);
+    // Lost the line - search for it
+    // Alternate between curving left and right
+    if (searchDirection) {
+      curveLeft(SPEED_SLOW);
+    } else {
+      curveRight(SPEED_SLOW);
+    }
+    // Toggle direction for next search attempt
+    searchDirection = !searchDirection;
   }
 }
 
